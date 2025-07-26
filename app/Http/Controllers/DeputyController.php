@@ -10,12 +10,9 @@ use App\Services\ExpenseService;
 
 class DeputyController
 {
-    protected DeputyService $deputyService;
-
-    public function __construct(DeputyService $deputyService)
-    {
-        $this->deputyService = $deputyService;
-    }
+    public function __construct(
+        protected DeputyService $deputyService
+    ) {}
 
     public function index(Request $request, int $perPage = 15)
     {

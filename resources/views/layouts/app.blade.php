@@ -23,10 +23,14 @@
 <body class="bg-gray-100 text-gray-800">
     <header class="bg-sky-950 text-white shadow">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-xl font-semibold">Sistema de Deputados</h1>
+            <h1 class="text-xl font-semibold">
+                <a href="{{ route('deputies.index') }}">
+                    RETTA
+                </a> 
+            </h1>
             <nav>
                 <a href="{{ route('deputies.index') }}" class="text-white hover:underline">Deputados</a>
-                {{-- Adicione outros links aqui se necessário --}}
+                <a href="{{ route('political-parties.index') }}" class="text-white hover:underline">Partidos</a>
             </nav>
         </div>
     </header>
