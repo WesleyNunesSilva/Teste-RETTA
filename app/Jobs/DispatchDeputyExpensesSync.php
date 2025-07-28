@@ -13,6 +13,9 @@ class DispatchDeputyExpensesSync implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public function __construct() {
+        $this->onQueue('default');
+    }
     public function handle(): void
     {
         Deputy::chunkById(100, function ($deputies) {

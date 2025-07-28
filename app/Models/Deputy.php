@@ -22,13 +22,15 @@ class Deputy extends Model
         return $this->hasMany(Expense::class);
     }
     
-    public function legislativeProposals(): HasMany
+    public function legislativeProposals()
     {
-        return $this->hasMany(LegislativeProposal::class);
-    }
-    
-    public function votes(): HasMany
-    {
-        return $this->hasMany(Vote::class);
+        return $this->hasManyThrough(
+            LegislativeProposal::class,
+            ProposalAuthor::class,
+            'deputy_id',
+            'id',
+            'id',
+            'legislative_proposal_id',
+        );
     }
 }

@@ -85,11 +85,17 @@ class SyncDeputiesFromApi implements ShouldQueue
         DB::transaction(function () use ($data) {
             $partyId = $this->extractPartyId($data);
 
-            $party = PoliticalParty::updateOrCreate(
-                ['external_id' => $partyId],
-                ['acronym' => $data['siglaPartido'], 'name' => $data['siglaPartido']]
-            );
+            $party = PoliticalParty::firstOrNew(['external_id' => $partyId]);
+            $party->acronym = $data['siglaPartido'];
+            
+            $party->save();
 
+            if ($partyId) {
+                SyncPoliticalPartyFromApi::dispatch($partyId)
+                    ->onQueue('high')
+                    ->delay(now()->addSeconds(2));
+            }
+    
             Deputy::updateOrCreate(
                 ['external_id' => $data['id']],
                 [
@@ -125,78 +131,3 @@ class SyncDeputiesFromApi implements ShouldQueue
         return null;
     }
 }
-
-
-/*
-<?php
-
-namespace App\Jobs;
-
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Support\Facades\Http;
-use App\Models\Deputy;
-use App\Models\PoliticalParty;
-use Illuminate\Support\Facades\Log;
-
-class SyncDeputiesFromApi implements ShouldQueue
-{
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-    public function handle(): void
-    {
-        $response = Http::get('https://dadosabertos.camara.leg.br/api/v2/deputados', [
-            'itens' => 100,
-        ]);
-
-        if ($response->failed()) {
-            Log::error('Erro ao sincronizar deputados - API retornou falha');
-            return;
-        }
-        $deputies = $response->json('dados');
-
-        foreach ($deputies as $deputyData) {
-            if (!isset($deputyData['siglaPartido'], $deputyData['uriPartido'])) {
-                Log::warning('Deputado ignorado por falta de dados do partido', ['deputy' => $deputyData]);
-                continue;
-            }
-
-            $partyId = $deputyData['idPartido'] ?? null;
-
-            if (!$partyId && isset($deputyData['uriPartido'])) {
-                if (preg_match('/\/partidos\/(\d+)$/', $deputyData['uriPartido'], $matches)) {
-                    $partyId = (int) $matches[1];
-                }
-            }
-
-            if (!$partyId) {
-                Log::warning('Deputado ignorado: não foi possível extrair id do partido', ['deputy' => $deputyData]);
-                continue;
-            }
-
-            $politicalParty = PoliticalParty::updateOrCreate(
-                ['acronym' => $deputyData['siglaPartido']],
-                [
-                    'external_id' => $partyId,
-                    'name' => $deputyData['siglaPartido'],
-                ]
-            );
-
-            Deputy::updateOrCreate(
-                ['external_id' => $deputyData['id']],
-                [
-                    'political_party_id' => $politicalParty->id,
-                    'name' => $deputyData['nome'] ?? null,
-                    'email' => $deputyData['email'] ?? null,
-                    'state_acronym' => $deputyData['siglaUf'] ?? null,
-                ]
-            );
-        }
-
-        Log::info('Deputados sincronizados com sucesso');
-    }
-}
-*/

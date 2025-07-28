@@ -29,8 +29,12 @@ class DeputyService
 
     public function find(int $id): ?Deputy
     {
-        return Deputy::with(['politicalParty', 'expenses', 'legislativeProposals'])->find($id);
+        return Deputy::with([
+            'politicalParty',
+            'expenses',
+            'legislativeProposals' => function ($query) {
+                $query->latest();
+            }
+        ])->find($id);
     }
-
-
 }

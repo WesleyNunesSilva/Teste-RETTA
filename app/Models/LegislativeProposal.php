@@ -13,11 +13,10 @@ class LegislativeProposal extends Model
     protected $fillable = [
         'external_id', 
         'deputy_id',
-        'type_acronym', // sigla_tipo
+        'type_acronym',
         'number',
         'year',
-        'summary', // ementa
-        'status' // situacao
+        'summary',
     ];
     
     public function deputy(): BelongsTo
@@ -25,8 +24,9 @@ class LegislativeProposal extends Model
         return $this->belongsTo(Deputy::class);
     }
     
-    public function votings(): HasMany
+    public function authors()
     {
-        return $this->hasMany(Voting::class);
+        return $this->hasMany(ProposalAuthor::class);
     }
+
 }

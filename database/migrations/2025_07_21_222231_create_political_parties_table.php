@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('external_id')->unique();
             $table->string('acronym', 15);
-            $table->string('name');
+            $table->string('name')->nullable();
             $table->timestamps();
         });
     }
